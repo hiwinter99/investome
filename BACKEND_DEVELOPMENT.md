@@ -1,13 +1,16 @@
 # 백엔드 저장소 구분
 
-- 프론트엔드 운영 소스: `Kimdonggyu26/investome`, Vercel.
-- 백엔드 운영 소스: `Kimdonggyu26/investome-backend`, Render.
-- 이 저장소의 `backend/`는 모의투자 초기 개발 사본이며 운영 백엔드 전체가 아니다. Render 소스를 이 폴더로 바꾸면 안 된다.
-- 2026-10-01 모의투자를 기존 운영 백엔드에 통합한 커밋: `f1c6ae4` (investome-backend).
-- 현재 PC의 운영 백엔드 작업 폴더: `C:/workspaces/investome/work/investome-backend`. 별도 Git 저장소이며 상위 저장소의 work/ 제외 규칙으로 프론트에 중복 업로드하지 않는다.
-- 백엔드 수정은 위 별도 저장소에서 수행하고 `git remote -v`로 investome-backend 대상인지 확인한다.
-- 다른 PC에서는 investome-backend 저장소를 별도로 clone한다. 이 저장소의 backend/ 변경만으로 Render에 반영되지 않는다.
-- Render: Source=investome-backend, Branch=main, Root Directory=빈 값, Dockerfile=Dockerfile, Build Context=기존 값.
+- 프론트엔드 운영 소스: `hiwinter99/investome`, Vercel.
+- 백엔드 운영 소스: `hiwinter99/investome-backend`, Render.
+- 기본 로컬 배치: `investome`와 `investome-backend`를 같은 상위 폴더에 둡니다.
+- 이 PC의 백엔드: `/Users/hiwinter99/Documents/GitHub/investome-backend`.
+- 다른 위치는 `INVESTOME_BACKEND_DIR`으로 지정합니다. 실행 안내는 `LAPTOP_SETUP.md`를 참고하세요.
+- 예전 `investome/backend/`는 모의투자 초기 개발 사본으로, 중복을 없애기 위해 제거했습니다.
+- 초기 학습 문서는 `docs/archive/PAPER_TRADING_GUIDE.md`, 제거 전 로컬 백업은 `work/backend-archive-2026-10-04/backend.tar.gz`입니다.
+- 백엔드 수정은 별도 저장소에서 수행하고 `git remote -v`로 대상 저장소를 확인합니다.
+- 2026-10-01 모의투자 통합 기록: `f1c6ae4` (investome-backend). 현재 로컬 main과 일치합니다.
+- 문서에 기록된 Render 설정: Source=investome-backend, Branch=main, Root Directory=빈 값, Dockerfile=Dockerfile.
+- 현재 Render 배포 커밋은 이번 정리에서 확인하지 않았습니다.
 
-통합 테스트 46개: 모의투자, 기존 로그인/refresh 토큰 연동, 관심종목/알림 조회 포함.
-로컬 H2 모의계좌/테스트 계정은 운영 PostgreSQL로 옮기지 않았다.
+기존 통합 기록에는 테스트 46개 통과가 기재돼 있습니다. 이번 폴더 정리에서 서버 테스트를 다시 실행하지 않았습니다.
+로컬 H2 모의계좌/테스트 계정을 운영 PostgreSQL로 옮기지 않습니다.

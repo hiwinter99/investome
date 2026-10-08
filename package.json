@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "dev:api": "vercel dev --listen 3000",
-    "dev:backend": "cd backend && mvnw.cmd spring-boot:run",
+    "dev:backend": "node scripts/start-backend.mjs",
+    "dev:backend:preview": "node scripts/start-backend.mjs --preview",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"

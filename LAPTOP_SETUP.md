@@ -1,72 +1,71 @@
-# 노트북에서 이어서 작업하기 (Windows)
+# 로컬 개발 실행
 
-작업 브랜치: `codex/paper-trading-handoff`
-필수: Git, Node.js 22.12 이상, JDK 17 (`java -version`으로 확인).
+## 저장소 배치
 
-## 처음 가져오기
+프론트와 백엔드를 같은 상위 폴더에 둡니다.
 
-```powershell
-git clone --branch codex/paper-trading-handoff https://github.com/Kimdonggyu26/investome.git
-cd investome
-npm ci
+```text
+GitHub/
+  investome/
+  investome-backend/
 ```
 
-기존 clone이 있으면 작업 중인 변경을 먼저 커밋/보관한 후:
+백엔드가 없으면 상위 폴더에서:
 
-```powershell
-git fetch origin
-git switch codex/paper-trading-handoff
-git pull --ff-only
-npm ci
+```sh
+git clone https://github.com/hiwinter99/investome-backend.git
 ```
 
-## 로컬 키 설정
+다른 위치는 `INVESTOME_BACKEND_DIR` 환경변수로 지정합니다.
+필수 도구: Git, Node.js 22.12 이상, JDK 17. 두 저장소의 변경 사항은 각각 관리합니다.
 
-프로젝트 루트에 `.env.local`을 만들고 한투 키를 로컬에서 입력하세요.
-키는 현재 PC의 `.env.local`에서 개인적으로 옮기거나 발급받은 설정을 사용합니다.
-키를 GitHub나 채팅에 올리지 마세요. `VITE_` 접두사로 한투 키를 만들지 않습니다.
+## 일반 개발
 
-```dotenv
-KIS_APP_KEY=본인의_키
-KIS_APP_SECRET=본인의_시크릿
+`investome`에서 `npm ci`로 프론트 의존성을 설치합니다.
+별도 백엔드의 개발용 PostgreSQL 연결과 `JWT_SECRET`을 설정한 뒤:
+
+```sh
+npm run dev:backend
 ```
 
-## 실행 (터미널 두 개)
+별도 터미널에서 `npm run dev`를 실행합니다. Vite는 Spring API를 기본 `localhost:8080`으로 전달합니다.
+뉴스·일부 시세용 Vercel API는 추가 터미널에서 `npm run dev:api`를 실행합니다.
+일반 백엔드 실행은 별도 저장소의 application.yml을 사용하며 ddl-auto=update이므로 개발용 DB를 연결하세요.
 
-첫 번째 터미널, 프로젝트 루트에서:
+## 모의투자 로컬 미리보기
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\backend\start-paper-preview.ps1
+PostgreSQL 없이 별도 H2 파일 DB로 실행할 수 있습니다. 운영 DB와 기존 계정 데이터는 사용하지 않습니다.
+`investome`의 `.env.local`에 KIS_APP_KEY와 KIS_APP_SECRET을 직접 설정하면 실행 스크립트가 서버에 전달합니다.
+키에 VITE_ 접두사를 붙이지 않습니다.
+
+첫 번째 터미널:
+
+```sh
+npm run dev:backend:preview
 ```
 
-두 번째 터미널:
+Windows에서는 루트의 `start-paper-preview.ps1`도 사용할 수 있습니다.
+미리보기는 127.0.0.1:18081에서 실행하며 로컬에서만 Turnstile 검증을 생략합니다.
+DB와 JWT 키는 Git에서 제외되는 `work/local-preview/`에 보관합니다. 새 테스트 계정을 생성하세요.
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\start-paper-frontend.ps1
+두 번째 터미널 (macOS/Linux):
+
+```sh
+VITE_API_BASE_URL=http://127.0.0.1:18081 VITE_TURNSTILE_SITE_KEY='' npm run dev -- --host 127.0.0.1 --port 5176 --strictPort
 ```
 
+Windows에서는 기존 루트의 `start-paper-frontend.ps1`를 사용합니다.
 화면: http://127.0.0.1:5176/paper
-서버: http://localhost:18081
-
-모의투자와 인증을 위한 로컬 실행 구성입니다. 다른 화면의 뉴스·시세는 별도 Vercel API 구성이 필요할 수 있습니다.
-노트북은 별도 DB이므로 새 테스트 계정을 만들어 주세요. 이 PC의 계정과 거래내역은 GitHub에 포함하지 않습니다.
-노트북에서 만든 계정은 `backend/.local`에 저장되어 재시작해도 유지됩니다.
-
-## 현재 구현
-
-- 가상 현금 1,000만 원, 매수·매도, 거래 기록, 중복 체결 방지와 트랜잭션 롤백.
-- 일별 코스피 TOP30 검색·신규 매수, 순위 밖 보유종목 조회·매도 유지.
-- 한투 웹소켓 30종목 구독 → Spring → 인증 SSE → 현재가·수익률·당일 캔들 갱신.
-- 수정주가 20/60/100봉, 거래량, 가격축 평단가 표시, 보유종목/거래내역 탭.
-- 지정가 대기·취소, 수수료·세금·장 운영시간 제한은 미구현.
+뉴스·일부 시세는 별도 Vercel API 실행이 필요할 수 있습니다.
 
 ## 검증
 
-```powershell
-npm run build
-cd backend
-.\mvnw.cmd '-Dtest=Paper*Tests' test
-```
+프론트 저장소에서 `npm run build`, 별도 백엔드 저장소에서 `./mvnw test`를 실행합니다.
+Windows 백엔드는 `.\mvnw.cmd test`를 사용합니다.
 
-추가 설명은 `backend/PAPER_TRADING_GUIDE.md` 참고.
-`tmp/paper-ui-tools`, `work`, API 키, 로컬 DB, 로그는 이번 업로드에 포함하지 않습니다.
+## 예전 개발 사본
+
+중복 `backend/` 폴더는 제거했습니다.
+초기 학습 기록은 `docs/archive/PAPER_TRADING_GUIDE.md`에 보관했습니다.
+이 PC에서 제거 전 전체 사본은 `work/backend-archive-2026-10-04/backend.tar.gz`에 있습니다.
+`work/`는 Git에 포함되지 않으므로 이 백업은 다른 PC로 자동 전달되지 않습니다.
