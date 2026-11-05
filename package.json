@@ -23,6 +23,7 @@
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.13.1",
     "recharts": "^3.8.0",
+    "redis": "^6.3.1",
     "vercel": "^50.34.2"
   },
   "devDependencies": {

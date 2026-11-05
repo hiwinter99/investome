@@ -1,3 +1,5 @@
+import { cryptoCacheKey, redisEnabled, redisCommand } from "../lib/crypto-redis.mjs";
+
 const CACHE_TTL_MS = 5 * 60 * 1000;
 
 const globalCache = globalThis.__INVESTOME_CRYPTO_TOP30_CACHE__ || {
@@ -66,12 +68,30 @@ async function loadCryptoTop30() {
 
 async function getCryptoTop30Cached() {
   const now = Date.now();
+  let redisAvailable = false;
+  if (redisEnabled) {
+    try {
+      const raw = await redisCommand(client => client.get(cryptoCacheKey));
+      redisAvailable = true;
+      if (raw) {
+        const entry = JSON.parse(raw);
+        if (Array.isArray(entry.items) && entry.items.length > 0 && Number.isFinite(entry.updatedAt)) {
+          globalCache.data = entry.items;
+          globalCache.updatedAt = entry.updatedAt;
+          return entry.items;
+        }
+      }
+    } catch {
+      // Redis failure is a cache failure, not an API failure.
+      redisAvailable = false;
+    }
+  }
   const isFresh =
     Array.isArray(globalCache.data) &&
     globalCache.data.length > 0 &&
     now - globalCache.updatedAt < CACHE_TTL_MS;
 
-  if (isFresh) {
+  if (isFresh && !redisAvailable) {
     return globalCache.data;
   }
 
@@ -80,9 +100,17 @@ async function getCryptoTop30Cached() {
   }
 
   globalCache.inflight = loadCryptoTop30()
-    .then((items) => {
+    .then(async (items) => {
       globalCache.data = items;
       globalCache.updatedAt = Date.now();
+      if (redisEnabled) {
+        try {
+          await redisCommand(client => client.set(cryptoCacheKey,
+            JSON.stringify({ items, updatedAt: globalCache.updatedAt }), { EX: CACHE_TTL_MS / 1000 }));
+        } catch {
+          // Keep the successful upstream result even if Redis cannot store it.
+        }
+      }
       return items;
     })
     .finally(() => {
