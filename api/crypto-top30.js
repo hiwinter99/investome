@@ -1,6 +1,7 @@
 import { cryptoCacheKey, redisEnabled, redisCommand } from "../lib/crypto-redis.mjs";
 
-const CACHE_TTL_MS = 5 * 60 * 1000;
+const configuredTtl = Number(process.env.CRYPTO_CACHE_TTL_SECONDS || 300);
+const CACHE_TTL_MS = (Number.isInteger(configuredTtl) && configuredTtl > 0 ? configuredTtl : 300) * 1000;
 
 const globalCache = globalThis.__INVESTOME_CRYPTO_TOP30_CACHE__ || {
   data: null,
