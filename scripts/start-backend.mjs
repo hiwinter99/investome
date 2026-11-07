@@ -23,12 +23,18 @@ if (existsSync(envFile)) {
 }
 const args = ["spring-boot:run"];
 if (process.argv.includes("--preview")) {
-  const local = resolve(root, "work/local-preview");
+  const previewPort = Number(env.PREVIEW_PORT || 18081);
+  if (!Number.isInteger(previewPort) || previewPort < 1024 || previewPort > 65535) {
+    console.error("PREVIEW_PORT는 1024~65535 사이의 정수여야 합니다.");
+    process.exit(1);
+  }
+  // Each process uses its own H2 file so two previews do not lock the same DB.
+  const local = resolve(root, previewPort === 18081 ? "work/local-preview" : `work/local-preview-${previewPort}`);
   mkdirSync(local, { recursive: true });
   const keyFile = resolve(local, "jwt.key");
   if (!existsSync(keyFile)) writeFileSync(keyFile, randomBytes(32).toString("hex"), { mode: 0o600 });
   env.SPRING_APPLICATION_JSON = JSON.stringify({
-    server: { address: "127.0.0.1", port: 18081 },
+    server: { address: "127.0.0.1", port: previewPort },
     spring: {
       datasource: { url: `jdbc:h2:file:${local.replaceAll("\\", "/")}/paper-preview;MODE=PostgreSQL;DB_CLOSE_ON_EXIT=FALSE`, "driver-class-name": "org.h2.Driver", username: "sa", password: "" },
       jpa: { hibernate: { "ddl-auto": "update" }, properties: { hibernate: { dialect: "org.hibernate.dialect.H2Dialect" } } },
@@ -37,7 +43,7 @@ if (process.argv.includes("--preview")) {
     turnstile: { "secret-key": "" },
   });
   args.push("-Dspring-boot.run.useTestClasspath=true");
-  console.log("로컬 미리보기: http://127.0.0.1:18081 (별도 H2 DB)");
+  console.log(`로컬 미리보기: http://127.0.0.1:${previewPort} (별도 H2 DB)`);
 }
 console.log(`백엔드 소스: ${backend}`);
 const child = spawn(windows ? "cmd.exe" : "sh", windows ? ["/d", "/s", "/c", "mvnw.cmd", ...args] : [wrapper, ...args], {
