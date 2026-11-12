@@ -34,8 +34,8 @@ export default function App() {
       window.removeEventListener("focus", syncSession);
     };
   }, []);
-  <Analytics />
   return (
+  <>
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/news" element={<NewsPage />} />
@@ -49,7 +49,8 @@ export default function App() {
       <Route path="/signup" element={<AuthPage mode="signup" />} />
       <Route path="/asset/:market/:symbol" element={<AssetDetail />} />
     </Routes>
-    
+    <Analytics />
+    </>
   );
 
 }
