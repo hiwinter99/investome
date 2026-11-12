@@ -34,7 +34,7 @@ export default function App() {
       window.removeEventListener("focus", syncSession);
     };
   }, []);
-
+  <Analytics />
   return (
     <Routes>
       <Route path="/" element={<Home />} />
@@ -49,16 +49,7 @@ export default function App() {
       <Route path="/signup" element={<AuthPage mode="signup" />} />
       <Route path="/asset/:market/:symbol" element={<AssetDetail />} />
     </Routes>
+    
   );
 
-  
-
-  function App() {
-    return (
-      <>
-        {/* 기존 Investome 컴포넌트들 */}
-        <Analytics />
-      </>
-    );
-  }
 }
