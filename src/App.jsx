@@ -10,6 +10,7 @@ import BoardWritePage from "./pages/BoardWritePage";
 import BoardDetailPage from "./pages/BoardDetailPage";
 import AuthPage from "./pages/AuthPage";
 import { initializeAuthSession } from "./utils/auth";
+import { Analytics } from '@vercel/analytics/react';
 
 export default function App() {
   useEffect(() => {
@@ -49,4 +50,15 @@ export default function App() {
       <Route path="/asset/:market/:symbol" element={<AssetDetail />} />
     </Routes>
   );
+
+  
+
+  function App() {
+    return (
+      <>
+        {/* 기존 Investome 컴포넌트들 */}
+        <Analytics />
+      </>
+    );
+  }
 }
